@@ -1,0 +1,7 @@
+caffe/build/
+build/
+*.caffemodel
+library/
+*.ycm_extra_conf.*
+*.swp
+*.swo
