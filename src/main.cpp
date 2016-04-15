@@ -1,15 +1,15 @@
 #include <cstdlib>
-#include <stdio.h>
+#include <cstdio>
 #include <vector>
 #include <utility>
 #include <algorithm>
-#include <iostream>
 #include <boost/filesystem.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <boost/chrono.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <caffe/caffe.hpp>
+#include <caffe/proto/caffe.pb.h>
 #include "common.hpp"
 #include "region.hpp"
 #include "extract_model_input.hpp"
@@ -23,6 +23,7 @@ using caffe::Net;
 using caffe::Solver;
 using caffe::Blob;
 using caffe::MemoryDataLayer;
+using caffe::Datum;
 
 int main(int argc, char** argv) {
     FLAGS_minloglevel = 2;
@@ -31,7 +32,6 @@ int main(int argc, char** argv) {
         printf("./program $test_dir\n");
         return -1;
     }
-    const string test_image_dirname = argv[1];
 
     boost::chrono::system_clock::time_point time_start;
 
@@ -40,14 +40,14 @@ int main(int argc, char** argv) {
      * -------------------------------------------------*/
     const string VGG16_MODEL = 
         "../models/VGG16/VGG_ILSVRC_16_layers.caffemodel";
-	static string VGG16_PROTO =
+    const string VGG16_PROTO =
         "../models/VGG16/VGG_ILSVRC_16_layers_deploy_with_reduction.prototxt";
     const int VGG16_INPUT_SIZE = 224;
     const string VGG16_INPUT_LAYER_NAME = "image_input";
     const string VGG16_OUTPUT_FEATURE_NAME = "conv1_high";
 
-	const string ELD_PROTO = "../models/ELD/deploy.prototxt";
-	const string ELD_MODEL = "../models/ELD/eldmodel_iter_112192.caffemodel";
+    const string ELD_PROTO = "../models/ELD/deploy.prototxt";
+    const string ELD_MODEL = "../models/ELD/eldmodel_iter_112192.caffemodel";
     const string ELD_INPUT_LOW_NAME = "lowlevel_db";
     const string ELD_INPUT_HIGH_NAME = "highlevel_db";
     const string ELD_SCORE_NAME = "score";
@@ -73,18 +73,22 @@ int main(int argc, char** argv) {
     fs::directory_iterator end_iter;
     vector<pair<string, string> > img_gt_filenames;
 
+    const string test_image_dirname = argv[1];
     fs::path test_image_dirpath(test_image_dirname), gtmask_dirpath;
     fs::directory_iterator imgdir_iter;
     for (imgdir_iter = fs::directory_iterator(test_image_dirpath);
             imgdir_iter != end_iter; imgdir_iter++) {
         string imgname = imgdir_iter->path().string();
-        if (imgname.find("_ELD.png") != string::npos) continue; // Skip results
+        if (imgname.find("_ELD.png") != string::npos) {
+            continue; // Skip results
+        }
         string gtmask_name = ""; // not used in Test mode
-        img_gt_filenames.push_back(std::make_pair(imgname, gtmask_name));
+        img_gt_filenames.push_back(std::make_pair(std::move(imgname),
+                    std::move(gtmask_name)));
     }
 
     std::sort(img_gt_filenames.begin(), img_gt_filenames.end()); // convenient
-    int total_image_number = img_gt_filenames.size();
+    const int total_image_number = img_gt_filenames.size();
 
     printf("Total file number : %d\n", total_image_number);
 
@@ -95,17 +99,15 @@ int main(int argc, char** argv) {
     for (int inum = 0; inum < total_image_number; inum++) {
         time_start = boost::chrono::system_clock::now(); // Check running time
         // Resize image. 
-        string image_path = img_gt_filenames[inum].first;
+        const string& image_path = img_gt_filenames[inum].first;
         printf("Current image(%d) : %s\n", inum, image_path.c_str());
         Mat image = cv::imread(image_path, 1);
         // Generate region information
-        GTOR grid2region; // Grid2Region map by region number
-        for (int i = 0; i < GRID_SIZE; i++) {
-            for (int j = 0; j < GRID_SIZE; j++) {
-                grid2region[i][j] = -1;
-            }
-        }
-        REGION_INFOS region_infos; // key : region number
+        GridToRegion grid2region; // Grid2Region map by region number
+        std::fill(&(grid2region[0][0]), 
+                &(grid2region[0][0]) + GRID_SIZE * GRID_SIZE, -1);
+
+        RegionInfos region_infos; // key : region number
         GenerateSlicRegions(image, region_infos, grid2region);
         InitializeLowlevelFeatures(image, region_infos);
 
@@ -161,20 +163,20 @@ int main(int argc, char** argv) {
                                            highlevel_datum_set[0]);
 
         // Generate Initial Feature Distance Map of all query regions
-#pragma omp parallel
-#pragma omp single
-{
-        for (std::map<int, Region>::const_iterator it = 
+        #pragma omp parallel
+        #pragma omp single
+        {
+            for (std::map<int, Region>::const_iterator it = 
                 std::begin(region_infos); it != std::end(region_infos); it++) {
-#pragma omp task firstprivate(it)
-            {
-                int index = std::distance(region_infos.cbegin(), it);
-                Datum lowlevel_datum;
-                GenerateInitialFeatureDistanceMapDatum(region_infos,
+                #pragma omp task firstprivate(it)
+                {
+                    int index = std::distance(region_infos.cbegin(), it);
+                    Datum lowlevel_datum;
+                    GenerateInitialFeatureDistanceMapDatum(region_infos,
                         grid2region, it->second, all_lowlevel_datums[index]);
+                }
             }
         }
-}
         // Query all regions concurrently
         const boost::shared_ptr<MemoryDataLayer<float> > low_input_layer =
             boost::static_pointer_cast<MemoryDataLayer<float> >(
@@ -194,12 +196,12 @@ int main(int argc, char** argv) {
                 ELD_model->blob_by_name(ELD_SCORE_NAME);
         // Save result to outputdir
         int idx = 0;
-        for (auto regpair : region_infos) {
+        for (auto& regpair : region_infos) {
             float* score_blob_data = score_blob->mutable_cpu_data() +
                 score_blob->offset(idx++);
             float saliency_score = score_blob_data[1];
             int format_score = saliency_score * 255;
-            for (auto pixel : regpair.second.get_pixels()) {
+            for (auto& pixel : regpair.second.get_pixels()) {
                 result.at<uchar>(pixel.row, pixel.col) =
                     static_cast<unsigned char>(format_score);
             }
