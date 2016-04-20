@@ -1,6 +1,6 @@
 ## SaliencyELD
 
-Source code for our CVPR 2016 paper "Deep Saliency with Encoded Low level Distance Map and High Level Features" by [Gayoung Lee](https://sites.google.com/site/gylee1103/), [Yu-Wing Tai](http://www.gdriv.es/yuwing) and [Junmo Kim](https://sites.google.com/site/siitkaist/professor).
+Source code for our CVPR 2016 paper "Deep Saliency with Encoded Low level Distance Map and High Level Features" by [Gayoung Lee](https://sites.google.com/site/gylee1103/), [Yu-Wing Tai](http://www.gdriv.es/yuwing) and [Junmo Kim](https://sites.google.com/site/siitkaist/professor). **([ArXiv paper link] (http://arxiv.org/abs/1604.05495))**
 
 ![Image of our model](./figs/model_pic.png)
 
