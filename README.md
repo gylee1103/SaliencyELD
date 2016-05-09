@@ -18,7 +18,8 @@ Acknowledgement : Our code uses various libraries: [Caffe](http://github.com/BVL
 
 2. **Installation**
     0. Get our pretrained model and VGG16 model. Some paths for caffe models and prototxts are hard-coded in **main.cpp**. Check them if you download models in the other folder.
-       NOTE: If you cannot download our ELD model from dropbox, please download it from [this Baidu link](http://pan.baidu.com/s/1jI94TAu). 
+       
+        **NOTE: If you cannot download our ELD model from dropbox, please download it from [this Baidu link](http://pan.baidu.com/s/1jI94TAu).**
 
         ```shell
         cd $(PROJECT_ROOT)/models/
@@ -58,17 +59,17 @@ Acknowledgement : Our code uses various libraries: [Caffe](http://github.com/BVL
 
 ![visualization](./figs/visualization.png)
 
-We provide our results of benchmark datasets used in the paper for convenience.
+We provide our results of benchmark datasets used in the paper for convenience. Link1 is the link using dropbox and link2 is using baidu.
 
-ASD results [Dropbox link](https://www.dropbox.com/s/mpkxuuok5h4sp7b/ASD_ELD.tar.gz?dl=1) [Baidu link](http://pan.baidu.com/s/1i4QREQD) (ASD dataset [site](http://ivrlwww.epfl.ch/supplementary_material/RK_CVPR09/index))
+ASD results [(link1)](https://www.dropbox.com/s/mpkxuuok5h4sp7b/ASD_ELD.tar.gz?dl=1) [(link2)](http://pan.baidu.com/s/1i4QREQD) (ASD dataset [site](http://ivrlwww.epfl.ch/supplementary_material/RK_CVPR09/index))
 
-ECSSD results [Dropbox link](https://www.dropbox.com/s/j5xooaqkxpduh51/ECSSD_ELD.tar.gz?dl=1) [Baidu link](http://pan.baidu.com/s/1o7A211g) (ECSSD dataset [site](http://www.cse.cuhk.edu.hk/leojia/projects/hsaliency/dataset.html))
+ECSSD results [(link1)](https://www.dropbox.com/s/j5xooaqkxpduh51/ECSSD_ELD.tar.gz?dl=1) [(link2)](http://pan.baidu.com/s/1o7A211g) (ECSSD dataset [site](http://www.cse.cuhk.edu.hk/leojia/projects/hsaliency/dataset.html))
 
-PASCAL-S results [Dropbox link](https://www.dropbox.com/s/o2g9ykynkpqjgdw/pascal_ELD.tar.gz?dl=1) [Baidu link](http://pan.baidu.com/s/1eS8rgDs) (PASCAL-S dataset [site](http://cbi.gatech.edu/salobj/))
+PASCAL-S results [(link1)](https://www.dropbox.com/s/o2g9ykynkpqjgdw/pascal_ELD.tar.gz?dl=1) [(link2)](http://pan.baidu.com/s/1eS8rgDs) (PASCAL-S dataset [site](http://cbi.gatech.edu/salobj/))
 
-DUT-OMRON results [Dropbox link](https://www.dropbox.com/s/kyomr7lnn42og4q/DUTOMRON_ELD.tar.gz?dl=1) [Baidu link](http://pan.baidu.com/s/1eS2R2eQ) (DUT-OMRON dataset [site](http://202.118.75.4/lu/DUT-OMRON/index.htm))
+DUT-OMRON results [(link1)](https://www.dropbox.com/s/kyomr7lnn42og4q/DUTOMRON_ELD.tar.gz?dl=1) [(link2)](http://pan.baidu.com/s/1eS2R2eQ) (DUT-OMRON dataset [site](http://202.118.75.4/lu/DUT-OMRON/index.htm))
 
-THUR15K results [Dropbox link](https://www.dropbox.com/s/zu004jx5hc0kabn/THUR15000_ELD.tar.gz?dl=1) [Baidu link](http://pan.baidu.com/s/1hs0L57e) (THUR15K dastaset [site](http://mmcheng.net/gsal/))
+THUR15K results [(link1)](https://www.dropbox.com/s/zu004jx5hc0kabn/THUR15000_ELD.tar.gz?dl=1) [(link2)](http://pan.baidu.com/s/1hs0L57e) (THUR15K dastaset [site](http://mmcheng.net/gsal/))
 
 
 
